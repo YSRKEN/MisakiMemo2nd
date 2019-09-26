@@ -47,9 +47,10 @@ const useStore = () => {
 
   // 状態の初期化
   useEffect(() => {
-    fetch('./idol_list.tsv').then((res: Response) => {
-      res.text().then((text: string) => {
-        console.log(text);
+    fetch('./idol_list.json').then((res: Response) => {
+      res.json().then((data: IdolData[]) => {
+        setIdolDataList(data);
+        console.log(data);
       });
     });
   }, []);

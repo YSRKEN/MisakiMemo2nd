@@ -1,0 +1,418 @@
+[
+	{
+		"id": 1,
+		"name": "天海春香",
+		"ruby": "あまみはるか",
+		"type": "Princess",
+		"music": "LEADER‼",
+		"color": "#e22b30"
+	},
+	{
+		"id": 2,
+		"name": "如月千早",
+		"ruby": "きさらぎちはや",
+		"type": "Fairy",
+		"music": "LEADER‼",
+		"color": "#2743d2"
+	},
+	{
+		"id": 3,
+		"name": "星井美希",
+		"ruby": "ほしいみき",
+		"type": "Angel",
+		"music": "LEADER‼",
+		"color": "#b4e04b"
+	},
+	{
+		"id": 4,
+		"name": "萩原雪歩",
+		"ruby": "はぎわらゆきほ",
+		"type": "Princess",
+		"music": "LEADER‼",
+		"color": "#d3dde9"
+	},
+	{
+		"id": 5,
+		"name": "高槻やよい",
+		"ruby": "たかつきやよい",
+		"type": "Angel",
+		"music": "LEADER‼",
+		"color": "#f39939"
+	},
+	{
+		"id": 6,
+		"name": "菊地真",
+		"ruby": "きくちまこと",
+		"type": "Princess",
+		"music": "LEADER‼",
+		"color": "#515558"
+	},
+	{
+		"id": 7,
+		"name": "水瀬伊織",
+		"ruby": "みなせいおり",
+		"type": "Fairy",
+		"music": "LEADER‼",
+		"color": "#fd99e1"
+	},
+	{
+		"id": 8,
+		"name": "四条貴音",
+		"ruby": "しじょうたかね",
+		"type": "Fairy",
+		"music": "LEADER‼",
+		"color": "#a6126a"
+	},
+	{
+		"id": 9,
+		"name": "秋月律子",
+		"ruby": "あきづきりつこ",
+		"type": "Fairy",
+		"music": "LEADER‼",
+		"color": "#01a860"
+	},
+	{
+		"id": 10,
+		"name": "三浦あずさ",
+		"ruby": "みうらあずさ",
+		"type": "Angel",
+		"music": "LEADER‼",
+		"color": "#9238be"
+	},
+	{
+		"id": 11,
+		"name": "双海亜美",
+		"ruby": "ふたみあみ",
+		"type": "Angel",
+		"music": "LEADER‼",
+		"color": "#ffe43f"
+	},
+	{
+		"id": 12,
+		"name": "双海真美",
+		"ruby": "ふたみまみ",
+		"type": "Angel",
+		"music": "LEADER‼",
+		"color": "#ffe43f"
+	},
+	{
+		"id": 13,
+		"name": "我那覇響",
+		"ruby": "がなはひびき",
+		"type": "Princess",
+		"music": "LEADER‼",
+		"color": "#01adb9"
+	},
+	{
+		"id": 14,
+		"name": "春日未来",
+		"ruby": "かすがみらい",
+		"type": "Princess",
+		"music": "Episode．Tiara",
+		"color": "#ea5b76"
+	},
+	{
+		"id": 15,
+		"name": "最上静香",
+		"ruby": "もがみしずか",
+		"type": "Fairy",
+		"music": "ハーモニクス",
+		"color": "#6495cf"
+	},
+	{
+		"id": 16,
+		"name": "伊吹翼",
+		"ruby": "いぶきつばさ",
+		"type": "Angel",
+		"music": "ハルマチ女子",
+		"color": "#fed552"
+	},
+	{
+		"id": 17,
+		"name": "田中琴葉",
+		"ruby": "たなかことは",
+		"type": "Princess",
+		"music": "Episode．Tiara",
+		"color": "#92cfbb"
+	},
+	{
+		"id": 18,
+		"name": "島原エレナ",
+		"ruby": "しまばらえれな",
+		"type": "Angel",
+		"music": "虹色letters",
+		"color": "#9bce92"
+	},
+	{
+		"id": 19,
+		"name": "佐竹美奈子",
+		"ruby": "さたけみなこ",
+		"type": "Princess",
+		"music": "咲くは浮世の君花火",
+		"color": "#58a6dc"
+	},
+	{
+		"id": 20,
+		"name": "所恵美",
+		"ruby": "ところめぐみ",
+		"type": "Fairy",
+		"music": "昏き星、遠い月",
+		"color": "#454341"
+	},
+	{
+		"id": 21,
+		"name": "徳川まつり",
+		"ruby": "とくがわまつり",
+		"type": "Princess",
+		"music": "だってあなたはプリンセス",
+		"color": "#5abfb7"
+	},
+	{
+		"id": 22,
+		"name": "箱崎星梨花",
+		"ruby": "はこざきせりか",
+		"type": "Angel",
+		"music": "ピコピコIIKO！ インベーダー",
+		"color": "#ed90ba"
+	},
+	{
+		"id": 23,
+		"name": "野々原茜",
+		"ruby": "ののはらあかね",
+		"type": "Angel",
+		"music": "ハルマチ女子",
+		"color": "#eb613f"
+	},
+	{
+		"id": 24,
+		"name": "望月杏奈",
+		"ruby": "もちづきあんな",
+		"type": "Angel",
+		"music": "ピコピコIIKO！ インベーダー",
+		"color": "#7e6ca8"
+	},
+	{
+		"id": 25,
+		"name": "ロコ",
+		"ruby": "はんだろこ(伴田路子)",
+		"type": "Fairy",
+		"music": "月曜日のクリームソーダ",
+		"color": "#fff03c"
+	},
+	{
+		"id": 26,
+		"name": "七尾百合子",
+		"ruby": "ななおゆりこ",
+		"type": "Princess",
+		"music": "ZETTAI × BREAK‼ トゥインクルリズム",
+		"color": "#c7b83c"
+	},
+	{
+		"id": 27,
+		"name": "高山紗代子",
+		"ruby": "たかやまさよこ",
+		"type": "Princess",
+		"music": "咲くは浮世の君花火",
+		"color": "#7f6575"
+	},
+	{
+		"id": 28,
+		"name": "松田亜利沙",
+		"ruby": "まつだありさ",
+		"type": "Princess",
+		"music": "ZETTAI × BREAK‼ トゥインクルリズム",
+		"color": "#b54461"
+	},
+	{
+		"id": 29,
+		"name": "高坂海美",
+		"ruby": "こうさかうみみ",
+		"type": "Princess",
+		"music": "咲くは浮世の君花火",
+		"color": "#e9739b"
+	},
+	{
+		"id": 30,
+		"name": "中谷育",
+		"ruby": "なかたにいく",
+		"type": "Princess",
+		"music": "ZETTAI × BREAK‼ トゥインクルリズム",
+		"color": "#f7e78e"
+	},
+	{
+		"id": 31,
+		"name": "天空橋朋花",
+		"ruby": "てんくうばしともか",
+		"type": "Fairy",
+		"music": "昏き星、遠い月",
+		"color": "#bee3e3"
+	},
+	{
+		"id": 32,
+		"name": "エミリー",
+		"ruby": "えみりーすちゅあーと",
+		"type": "Princess",
+		"music": "だってあなたはプリンセス",
+		"color": "#554171"
+	},
+	{
+		"id": 33,
+		"name": "北沢志保",
+		"ruby": "きたざわしほ",
+		"type": "Fairy",
+		"music": "Melty Fantasia",
+		"color": "#afa690"
+	},
+	{
+		"id": 34,
+		"name": "舞浜歩",
+		"ruby": "まいはまあゆむ",
+		"type": "Fairy",
+		"music": "月曜日のクリームソーダ",
+		"color": "#e25a9b"
+	},
+	{
+		"id": 35,
+		"name": "木下ひなた",
+		"ruby": "きのしたひなた",
+		"type": "Angel",
+		"music": "ピコピコIIKO！ インベーダー",
+		"color": "#d1342c"
+	},
+	{
+		"id": 36,
+		"name": "矢吹可奈",
+		"ruby": "やぶきかな",
+		"type": "Princess",
+		"music": "Episode．Tiara",
+		"color": "#f5ad3b"
+	},
+	{
+		"id": 37,
+		"name": "横山奈緒",
+		"ruby": "よこやまなお",
+		"type": "Princess",
+		"music": "咲くは浮世の君花火",
+		"color": "#788bc5"
+	},
+	{
+		"id": 38,
+		"name": "二階堂千鶴",
+		"ruby": "にかいどうちづる",
+		"type": "Fairy",
+		"music": "昏き星、遠い月",
+		"color": "#f19557"
+	},
+	{
+		"id": 39,
+		"name": "馬場このみ",
+		"ruby": "ばばこのみ",
+		"type": "Angel",
+		"music": "花ざかりWeekend✿",
+		"color": "#f1becb"
+	},
+	{
+		"id": 40,
+		"name": "大神環",
+		"ruby": "おおがみたまき",
+		"type": "Angel",
+		"music": "ピコピコIIKO！ インベーダー",
+		"color": "#ee762e"
+	},
+	{
+		"id": 41,
+		"name": "豊川風花",
+		"ruby": "とよかわふうか",
+		"type": "Angel",
+		"music": "花ざかりWeekend✿",
+		"color": "#7278a8"
+	},
+	{
+		"id": 42,
+		"name": "宮尾美也",
+		"ruby": "みやおみや",
+		"type": "Angel",
+		"music": "虹色letters",
+		"color": "#d7a96b"
+	},
+	{
+		"id": 43,
+		"name": "福田のり子",
+		"ruby": "ふくだのりこ",
+		"type": "Princess",
+		"music": "咲くは浮世の君花火",
+		"color": "#eceb70"
+	},
+	{
+		"id": 44,
+		"name": "真壁瑞希",
+		"ruby": "まかべみづき",
+		"type": "Fairy",
+		"music": "Melty Fantasia",
+		"color": "#99b7dc"
+	},
+	{
+		"id": 45,
+		"name": "篠宮可憐",
+		"ruby": "しのみやかれん",
+		"type": "Angel",
+		"music": "ハルマチ女子",
+		"color": "#b63b40"
+	},
+	{
+		"id": 46,
+		"name": "百瀬莉緒",
+		"ruby": "ももせりお",
+		"type": "Fairy",
+		"music": "昏き星、遠い月",
+		"color": "#f19591"
+	},
+	{
+		"id": 47,
+		"name": "永吉昴",
+		"ruby": "ながたにすばる",
+		"type": "Fairy",
+		"music": "月曜日のクリームソーダ",
+		"color": "#aeb49c"
+	},
+	{
+		"id": 48,
+		"name": "北上麗花",
+		"ruby": "きたかみれいか",
+		"type": "Angel",
+		"music": "花ざかりWeekend✿",
+		"color": "#6bb6b0"
+	},
+	{
+		"id": 49,
+		"name": "周防桃子",
+		"ruby": "すおうももこ",
+		"type": "Fairy",
+		"music": "月曜日のクリームソーダ",
+		"color": "#efb864"
+	},
+	{
+		"id": 50,
+		"name": "ジュリア",
+		"ruby": "じゅりあ",
+		"type": "Fairy",
+		"music": "ハーモニクス",
+		"color": "#d7385f"
+	},
+	{
+		"id": 51,
+		"name": "白石紬",
+		"ruby": "しらいしつむぎ",
+		"type": "Fairy",
+		"music": "Melty Fantasia",
+		"color": "#ebe1ff"
+	},
+	{
+		"id": 52,
+		"name": "桜守歌織",
+		"ruby": "さくらもりかおり",
+		"type": "Angel",
+		"music": "花ざかりWeekend✿",
+		"color": "#274079"
+	}
+]
