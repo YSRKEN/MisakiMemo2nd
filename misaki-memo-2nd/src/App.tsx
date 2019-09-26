@@ -1,4 +1,4 @@
-import React, { createContext, useState, FormEvent, useContext } from 'react';
+import React, { createContext, useState, FormEvent, useContext, useEffect } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Row, Col, Form } from 'react-bootstrap';
@@ -26,12 +26,33 @@ interface ApplicationStore {
 // Context
 const StateContext = createContext<ApplicationStore>({} as ApplicationStore);
 
+// アイドルの情報
+interface IdolData {
+  id: number;
+  name: string;
+  ruby: string;
+  type: IdolType;
+  music: string;
+  color: string;
+}
+
 // ApplicationStore型の値を返す関数
 const useStore = () => {
   // アイドルの名前
   const [idolName, setIdolName] = useState('');
   // アイドルの属性
   const [idolType, setIdolType] = useState<IdolType>('All');
+  // アイドルのデータ一覧
+  const [idolDataList, setIdolDataList] = useState<IdolData[]>([]);
+
+  // 状態の初期化
+  useEffect(() => {
+    fetch('./idol_list.tsv').then((res: Response) => {
+      res.text().then((text: string) => {
+        console.log(text);
+      });
+    });
+  }, []);
 
   // Reduxのdispatchに相当する
   const dispatch = (action: Action) => {
