@@ -1,7 +1,13 @@
-import React, { createContext, useState, FormEvent, useContext, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  FormEvent,
+  useContext,
+  useEffect,
+} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Row, Col, Form } from 'react-bootstrap';
+import { Container, Row, Col, Form, ListGroup } from 'react-bootstrap';
 
 // Actionの種類
 type ActionType = 'setIdolName' | 'setIdolType';
@@ -20,6 +26,7 @@ interface Action {
 interface ApplicationStore {
   idolName: string;
   idolType: IdolType;
+  filteredIdolDataList: IdolData[];
   dispatch: (action: Action) => void;
 }
 
@@ -44,6 +51,10 @@ const useStore = () => {
   const [idolType, setIdolType] = useState<IdolType>('All');
   // アイドルのデータ一覧
   const [idolDataList, setIdolDataList] = useState<IdolData[]>([]);
+  // 表示するアイドルの一覧
+  const [filteredIdolDataList, setFilteredIdolDataList] = useState<IdolData[]>(
+    [],
+  );
 
   // 状態の初期化
   useEffect(() => {
@@ -54,6 +65,25 @@ const useStore = () => {
       });
     });
   }, []);
+
+  // 表示するアイドルの一覧を更新
+  useEffect(() => {
+    if (idolType === 'All') {
+      setFilteredIdolDataList(
+        idolDataList.filter(record =>
+          `${record.name}/${record.ruby}`.includes(idolName),
+        ),
+      );
+    } else {
+      setFilteredIdolDataList(
+        idolDataList.filter(
+          record =>
+            `${record.name}/${record.ruby}`.includes(idolName) &&
+            record.type === idolType,
+        ),
+      );
+    }
+  }, [idolName, idolType, idolDataList]);
 
   // Reduxのdispatchに相当する
   const dispatch = (action: Action) => {
@@ -69,7 +99,7 @@ const useStore = () => {
     }
   };
 
-  return { idolName, idolType, dispatch };
+  return { idolName, idolType, filteredIdolDataList, dispatch };
 };
 
 // 検索フォームのComponent
@@ -87,8 +117,6 @@ const SearchForm: React.FC = () => {
       type: 'setIdolType',
       message: e.currentTarget.value,
     } as Action);
-
-  const onCLickTestButton = () => alert(`name=${idolName}\ntype=${idolType}`);
 
   return (
     <Form className="border p-3">
@@ -109,10 +137,20 @@ const SearchForm: React.FC = () => {
           ))}
         </Form.Control>
       </Form.Group>
-      <Button className="w-100" onClick={onCLickTestButton}>
-        テスト
-      </Button>
     </Form>
+  );
+};
+
+// 検索フォームのComponent
+const IdolView: React.FC = () => {
+  const { filteredIdolDataList } = useContext(StateContext);
+
+  return (
+    <ListGroup>
+      {filteredIdolDataList.map((idol: IdolData) => (
+        <ListGroup.Item key={idol.id}>{idol.name}</ListGroup.Item>
+      ))}
+    </ListGroup>
   );
 };
 
@@ -131,6 +169,11 @@ const App: React.FC = () => {
         <Row>
           <Col xs={12} md={6} className="my-3 mx-auto">
             <SearchForm />
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12} md={6} className="my-3 mx-auto">
+            <IdolView />
           </Col>
         </Row>
       </Container>
