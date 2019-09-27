@@ -145,11 +145,31 @@ const SearchForm: React.FC = () => {
 const IdolView: React.FC = () => {
   const { filteredIdolDataList } = useContext(StateContext);
 
+  if (filteredIdolDataList.length > 0) {
+    return (
+      <ListGroup>
+        {filteredIdolDataList.map((idol: IdolData) => (
+          <ListGroup.Item key={idol.id}>
+            <div className="d-flex">
+              <div
+                className="border border-dark mr-1 mt-1"
+                style={{
+                  backgroundColor: idol.color,
+                  width: 20,
+                  height: 20,
+                }}
+              />
+              <span className="font-weight-bold">{idol.name}</span>
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    );
+  }
+
   return (
     <ListGroup>
-      {filteredIdolDataList.map((idol: IdolData) => (
-        <ListGroup.Item key={idol.id}>{idol.name}</ListGroup.Item>
-      ))}
+      <ListGroup.Item>※該当者がいませんでした</ListGroup.Item>
     </ListGroup>
   );
 };
