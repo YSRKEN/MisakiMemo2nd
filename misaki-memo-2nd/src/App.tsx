@@ -222,7 +222,9 @@ const IdolView: React.FC = () => {
                 <span className="font-weight-bold">{idolState.idol.name}</span>
                 {
                   missionName in MISSION_TEXT_TO_INDEX
-                  ? (<span>　ミッション＝{idolState.missionFlg[MISSION_TEXT_TO_INDEX[missionName]] ? '達成' : '未達成'}</span>)
+                  ? (<span>　{idolState.missionFlg[MISSION_TEXT_TO_INDEX[missionName]]
+                      ? '達成'
+                      : missionName.includes('指定曲') ? `未達成(${idolState.idol.music})` : '未達成'}</span>)
                   : (<span>　ミッション達成数＝{missionCount}</span>)
                 }
               </div>
