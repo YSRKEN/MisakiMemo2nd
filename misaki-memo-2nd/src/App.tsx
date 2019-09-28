@@ -22,11 +22,17 @@ interface Action {
   message: string;
 }
 
+// ミッション状況を表現するためのインターフェース
+interface IdolState {
+  idol: IdolData;
+  missionFlg: boolean[];
+}
+
 // アプリケーションの状態を保存するためのインターフェース
 interface ApplicationStore {
   idolName: string;
   idolType: IdolType;
-  filteredIdolDataList: IdolData[];
+  filteredIdolStateList: IdolState[];
   dispatch: (action: Action) => void;
 }
 
@@ -50,18 +56,21 @@ const useStore = () => {
   // アイドルの属性
   const [idolType, setIdolType] = useState<IdolType>('All');
   // アイドルのデータ一覧
-  const [idolDataList, setIdolDataList] = useState<IdolData[]>([]);
+  const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
-  const [filteredIdolDataList, setFilteredIdolDataList] = useState<IdolData[]>(
-    [],
-  );
+  const [filteredIdolStateList, setFilteredIdolStateList] = useState<IdolState[]>([]);
 
   // 状態の初期化
   useEffect(() => {
     fetch('./idol_list.json').then((res: Response) => {
-      res.json().then((data: IdolData[]) => {
-        setIdolDataList(data);
-        console.log(data);
+      res.json().then((dataList: IdolData[]) => {
+        setIdolStateList(dataList.map((data: IdolData) => {
+          return {
+            'idol': data, 'missionFlg': [
+              false, false, false, false, false, false, false, false, false, false
+            ]
+          } as IdolState;
+        }));
       });
     });
   }, []);
@@ -69,21 +78,21 @@ const useStore = () => {
   // 表示するアイドルの一覧を更新
   useEffect(() => {
     if (idolType === 'All') {
-      setFilteredIdolDataList(
-        idolDataList.filter(record =>
-          `${record.name}/${record.ruby}`.includes(idolName),
+      setFilteredIdolStateList(
+        idolStateList.filter(record =>
+          `${record.idol.name}/${record.idol.ruby}`.includes(idolName),
         ),
       );
     } else {
-      setFilteredIdolDataList(
-        idolDataList.filter(
+      setFilteredIdolStateList(
+        idolStateList.filter(
           record =>
-            `${record.name}/${record.ruby}`.includes(idolName) &&
-            record.type === idolType,
+            `${record.idol.name}/${record.idol.ruby}`.includes(idolName) &&
+            record.idol.type === idolType,
         ),
       );
     }
-  }, [idolName, idolType, idolDataList]);
+  }, [idolName, idolType, idolStateList]);
 
   // Reduxのdispatchに相当する
   const dispatch = (action: Action) => {
@@ -99,7 +108,7 @@ const useStore = () => {
     }
   };
 
-  return { idolName, idolType, filteredIdolDataList, dispatch };
+  return { idolName, idolType, filteredIdolStateList, dispatch };
 };
 
 // 検索フォームのComponent
@@ -143,26 +152,30 @@ const SearchForm: React.FC = () => {
 
 // 検索フォームのComponent
 const IdolView: React.FC = () => {
-  const { filteredIdolDataList } = useContext(StateContext);
+  const { filteredIdolStateList } = useContext(StateContext);
 
-  if (filteredIdolDataList.length > 0) {
+  if (filteredIdolStateList.length > 0) {
     return (
       <ListGroup>
-        {filteredIdolDataList.map((idol: IdolData) => (
-          <ListGroup.Item key={idol.id}>
-            <div className="d-flex">
-              <div
-                className="border border-dark mr-1 mt-1"
-                style={{
-                  backgroundColor: idol.color,
-                  width: 20,
-                  height: 20,
-                }}
-              />
-              <span className="font-weight-bold">{idol.name}</span>
-            </div>
-          </ListGroup.Item>
-        ))}
+        {filteredIdolStateList.map((idolState: IdolState) => {
+          const missionCount = idolState.missionFlg.filter(flg => flg).length;
+          return (
+            <ListGroup.Item key={idolState.idol.id}>
+              <div className="d-flex">
+                <div
+                  className="border border-dark mr-1 mt-1"
+                  style={{
+                    backgroundColor: idolState.idol.color,
+                    width: 20,
+                    height: 20,
+                  }}
+                />
+                <span className="font-weight-bold">{idolState.idol.name}</span>
+                <span>　ミッション達成数＝{missionCount}</span>
+              </div>
+            </ListGroup.Item>
+          );
+        })}
       </ListGroup>
     );
   }
