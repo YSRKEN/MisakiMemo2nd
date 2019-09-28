@@ -10,11 +10,40 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Form, ListGroup } from 'react-bootstrap';
 
 // Actionの種類
-type ActionType = 'setIdolName' | 'setIdolType';
+type ActionType = 'setIdolName' | 'setIdolType' | 'setMissionName';
 
 // アイドルの属性の種類
 type IdolType = 'All' | 'Princess' | 'Fairy' | 'Angel';
 const IDOL_TYPE_LIST = ['All', 'Princess', 'Fairy', 'Angel'];
+
+// ミッションの内容
+const MISSION_TEXT_LIST = [
+  'アイドルを覚醒させる',
+  'ユニットライブの成功',
+  'ソロライブ成功させる',
+  '親愛度を50以上増やす',
+  'メモリアルコミュ閲覧',
+  '13人ライブ MVを見る',
+  'ギフトプレゼントする',
+  '(指定曲)をクリアする',
+  'メールかブログを見る',
+  'ドレスアップで着替え'
+];
+
+const MISSION_TEXT_LIST2 = ['(未指定)', ...MISSION_TEXT_LIST];
+
+const MISSION_TEXT_TO_INDEX: {[key: string]: number} = {
+  'アイドルを覚醒させる': 0,
+  'ユニットライブの成功': 1,
+  'ソロライブ成功させる': 2,
+  '親愛度を50以上増やす': 3,
+  'メモリアルコミュ閲覧': 4,
+  '13人ライブ MVを見る': 5,
+  'ギフトプレゼントする': 6,
+  '(指定曲)をクリアする': 7,
+  'メールかブログを見る': 8,
+  'ドレスアップで着替え': 9
+};
 
 // Actionを表現するインターフェース
 interface Action {
@@ -32,6 +61,7 @@ interface IdolState {
 interface ApplicationStore {
   idolName: string;
   idolType: IdolType;
+  missionName: string;
   filteredIdolStateList: IdolState[];
   dispatch: (action: Action) => void;
 }
@@ -55,6 +85,8 @@ const useStore = () => {
   const [idolName, setIdolName] = useState('');
   // アイドルの属性
   const [idolType, setIdolType] = useState<IdolType>('All');
+  // ミッションのインデックス
+  const [missionName, setMissionName] = useState(MISSION_TEXT_LIST2[0]);
   // アイドルのデータ一覧
   const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
@@ -103,17 +135,20 @@ const useStore = () => {
       case 'setIdolType':
         setIdolType(action.message as IdolType);
         break;
+      case 'setMissionName':
+        setMissionName(action.message);
+        break;
       default:
         break;
     }
   };
 
-  return { idolName, idolType, filteredIdolStateList, dispatch };
+  return { idolName, idolType, missionName, filteredIdolStateList, dispatch };
 };
 
 // 検索フォームのComponent
 const SearchForm: React.FC = () => {
-  const { idolName, idolType, dispatch } = useContext(StateContext);
+  const { idolName, idolType, missionName, dispatch } = useContext(StateContext);
 
   const onChangeIdolName = (e: FormEvent<any>) =>
     dispatch({
@@ -126,6 +161,12 @@ const SearchForm: React.FC = () => {
       type: 'setIdolType',
       message: e.currentTarget.value,
     } as Action);
+
+  const onChangeMissionName = (e: FormEvent<any>) =>
+    dispatch({
+      type: 'setMissionName',
+      message: e.currentTarget.value,
+  } as Action);
 
   return (
     <Form className="border p-3">
@@ -146,13 +187,21 @@ const SearchForm: React.FC = () => {
           ))}
         </Form.Control>
       </Form.Group>
+      <Form.Group controlId="idolType">
+        <Form.Label>ミッションの種類</Form.Label>
+        <Form.Control as="select" value={missionName} onChange={onChangeMissionName}>
+          {MISSION_TEXT_LIST2.map((name: string) => (
+            <option key={name}>{name}</option>
+          ))}
+        </Form.Control>
+      </Form.Group>
     </Form>
   );
 };
 
-// 検索フォームのComponent
+// アイドル一覧のComponent
 const IdolView: React.FC = () => {
-  const { filteredIdolStateList } = useContext(StateContext);
+  const { missionName, filteredIdolStateList } = useContext(StateContext);
 
   if (filteredIdolStateList.length > 0) {
     return (
@@ -171,7 +220,11 @@ const IdolView: React.FC = () => {
                   }}
                 />
                 <span className="font-weight-bold">{idolState.idol.name}</span>
-                <span>　ミッション達成数＝{missionCount}</span>
+                {
+                  missionName in MISSION_TEXT_TO_INDEX
+                  ? (<span>　ミッション＝{idolState.missionFlg[MISSION_TEXT_TO_INDEX[missionName]] ? '達成' : '未達成'}</span>)
+                  : (<span>　ミッション達成数＝{missionCount}</span>)
+                }
               </div>
             </ListGroup.Item>
           );
