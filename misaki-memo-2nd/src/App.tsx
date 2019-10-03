@@ -14,11 +14,21 @@ type ActionType =
   | 'setIdolName'
   | 'setIdolType'
   | 'setMissionName'
-  | 'changeMissionState';
+  | 'changeMissionState'
+  | 'setSortType';
 
 // アイドルの属性の種類
 type IdolType = 'All' | 'Princess' | 'Fairy' | 'Angel';
 const IDOL_TYPE_LIST = ['All', 'Princess', 'Fairy', 'Angel'];
+
+// ソート順の種類(アイドルID順・ミッションの未達成順・ミッションの達成順)
+type SortType = 'IdolId' | 'MissionAsc' | 'MissionDesc';
+const SORT_TYPE_LIST = ['IdolId', 'MissionAsc', 'MissionDesc'];
+const SORT_TYPE_DICT: { [key: string]: string } = {
+  IdolId: 'アイドルID順',
+  MissionAsc: 'ミッションの未達成順',
+  MissionDesc: 'ミッションの達成順',
+};
 
 // ミッションの内容
 const MISSION_TEXT_LIST = [
@@ -66,6 +76,7 @@ interface ApplicationStore {
   idolName: string;
   idolType: IdolType;
   missionName: string;
+  sortType: SortType;
   filteredIdolStateList: IdolState[];
   dispatch: (action: Action) => void;
 }
@@ -91,6 +102,8 @@ const useStore = () => {
   const [idolType, setIdolType] = useState<IdolType>('All');
   // ミッションのインデックス
   const [missionName, setMissionName] = useState(MISSION_TEXT_LIST2[0]);
+  // ソート順
+  const [sortType, setSortType] = useState<SortType>('IdolId');
   // アイドルのデータ一覧
   const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
@@ -127,22 +140,67 @@ const useStore = () => {
 
   // 表示するアイドルの一覧を更新
   useEffect(() => {
+    let newIdolStateList: IdolState[] = [];
     if (idolType === 'All') {
-      setFilteredIdolStateList(
-        idolStateList.filter(record =>
-          `${record.idol.name}/${record.idol.ruby}`.includes(idolName),
-        ),
+      newIdolStateList = idolStateList.filter(record =>
+        `${record.idol.name}/${record.idol.ruby}`.includes(idolName),
       );
     } else {
-      setFilteredIdolStateList(
-        idolStateList.filter(
-          record =>
-            `${record.idol.name}/${record.idol.ruby}`.includes(idolName) &&
-            record.idol.type === idolType,
-        ),
+      newIdolStateList = idolStateList.filter(
+        record =>
+          `${record.idol.name}/${record.idol.ruby}`.includes(idolName) &&
+          record.idol.type === idolType,
       );
     }
-  }, [idolName, idolType, idolStateList]);
+    switch (sortType) {
+      case 'IdolId':
+        newIdolStateList = newIdolStateList.sort(
+          (a, b) => a.idol.id - b.idol.id,
+        );
+        break;
+      case 'MissionAsc': {
+        if (missionName === MISSION_TEXT_LIST2[0]) {
+          newIdolStateList = newIdolStateList.sort((a, b) => {
+            const aCount = a.missionFlg.filter(flg => flg).length;
+            const bCount = b.missionFlg.filter(flg => flg).length;
+
+            return aCount - bCount;
+          });
+        } else {
+          const missionIndex = MISSION_TEXT_TO_INDEX[missionName];
+          newIdolStateList = newIdolStateList.sort((a, b) => {
+            const aCount = a.missionFlg[missionIndex] ? 1 : 0;
+            const bCount = b.missionFlg[missionIndex] ? 1 : 0;
+
+            return aCount - bCount;
+          });
+        }
+        break;
+      }
+      case 'MissionDesc': {
+        if (missionName === MISSION_TEXT_LIST2[0]) {
+          newIdolStateList = newIdolStateList.sort((a, b) => {
+            const aCount = a.missionFlg.filter(flg => flg).length;
+            const bCount = b.missionFlg.filter(flg => flg).length;
+
+            return bCount - aCount;
+          });
+        } else {
+          const missionIndex = MISSION_TEXT_TO_INDEX[missionName];
+          newIdolStateList = newIdolStateList.sort((a, b) => {
+            const aCount = a.missionFlg[missionIndex] ? 1 : 0;
+            const bCount = b.missionFlg[missionIndex] ? 1 : 0;
+
+            return bCount - aCount;
+          });
+        }
+        break;
+      }
+      default:
+        break;
+    }
+    setFilteredIdolStateList(newIdolStateList);
+  }, [idolName, idolType, sortType, idolStateList, missionName]);
 
   // Reduxのdispatchに相当する
   const dispatch = (action: Action) => {
@@ -171,17 +229,27 @@ const useStore = () => {
         setIdolStateList(newIdolStateList);
         break;
       }
+      case 'setSortType':
+        setSortType(action.message as SortType);
+        break;
       default:
         break;
     }
   };
 
-  return { idolName, idolType, missionName, filteredIdolStateList, dispatch };
+  return {
+    idolName,
+    idolType,
+    missionName,
+    sortType,
+    filteredIdolStateList,
+    dispatch,
+  };
 };
 
 // 検索フォームのComponent
 const SearchForm: React.FC = () => {
-  const { idolName, idolType, missionName, dispatch } = useContext(
+  const { idolName, idolType, missionName, sortType, dispatch } = useContext(
     StateContext,
   );
 
@@ -200,6 +268,12 @@ const SearchForm: React.FC = () => {
   const onChangeMissionName = (e: FormEvent<any>) =>
     dispatch({
       type: 'setMissionName',
+      message: e.currentTarget.value,
+    } as Action);
+
+  const onChangeSortType = (e: FormEvent<any>) =>
+    dispatch({
+      type: 'setSortType',
       message: e.currentTarget.value,
     } as Action);
 
@@ -222,7 +296,7 @@ const SearchForm: React.FC = () => {
           ))}
         </Form.Control>
       </Form.Group>
-      <Form.Group controlId="idolType">
+      <Form.Group controlId="MissionType">
         <Form.Label>ミッションの種類</Form.Label>
         <Form.Control
           as="select"
@@ -234,10 +308,21 @@ const SearchForm: React.FC = () => {
           ))}
         </Form.Control>
       </Form.Group>
+      <Form.Group controlId="SortType">
+        <Form.Label>ソート順</Form.Label>
+        <Form.Control as="select" value={sortType} onChange={onChangeSortType}>
+          {SORT_TYPE_LIST.map((name: string) => (
+            <option key={name} value={name}>
+              {SORT_TYPE_DICT[name]}
+            </option>
+          ))}
+        </Form.Control>
+      </Form.Group>
     </Form>
   );
 };
 
+// アイドルのミッション進捗状況を表現するためのComponent
 const IdolMissionStatus: React.FC<{ idolState: IdolState }> = ({
   idolState,
 }) => {
