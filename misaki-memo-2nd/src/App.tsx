@@ -675,8 +675,20 @@ const App: React.FC = () => {
     <StateContext.Provider value={context}>
       <Container>
         <Row>
-          <Col className="m-3">
-            <h1 className="text-center">美咲メモ 2nd</h1>
+          <Col className="m-3 text-center">
+            <h1>美咲メモ 2nd</h1>
+            <span className="mr-3">Ver.1.0.0</span>
+            <span className="mr-3">
+              <a href="https://twitter.com/YSRKEN">作者Twitter</a>
+            </span>
+            <span className="mr-3">
+              <a href="https://github.com/YSRKEN/MisakiMemo2nd">GitHub</a>
+            </span>
+            <span>
+              <a href="https://github.com/YSRKEN/MisakiMemo2nd/blob/master/README.md">
+                取説
+              </a>
+            </span>
           </Col>
         </Row>
         <Row>
