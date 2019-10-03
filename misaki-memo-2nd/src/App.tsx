@@ -34,7 +34,7 @@ const MISSION_TEXT_LIST = [
   'ドレスアップで着替え',
 ];
 
-const MISSION_TEXT_LIST2 = ['(未指定)', ...MISSION_TEXT_LIST];
+const MISSION_TEXT_LIST2 = ['☆ミッション達成数', ...MISSION_TEXT_LIST];
 
 const MISSION_TEXT_TO_INDEX: { [key: string]: number } = {
   アイドルを覚醒させる: 0,
@@ -249,11 +249,43 @@ const IdolMissionStatus: React.FC<{ idolState: IdolState }> = ({
       message: `${idolState.idol.name},${missionName}`,
     } as Action);
 
+  const showMissionStatus = () => {
+    let text1 = '【達成済み】\n';
+    let text2 = '【未達成】\n';
+    idolState.missionFlg.forEach((flg: boolean, index: number) => {
+      if (flg) {
+        if (MISSION_TEXT_LIST[index].includes('指定曲')) {
+          text1 += `・${MISSION_TEXT_LIST[index].replace(
+            '(指定曲)',
+            idolState.idol.music,
+          )}\n`;
+        } else {
+          text1 += `・${MISSION_TEXT_LIST[index]}\n`;
+        }
+      } else if (MISSION_TEXT_LIST[index].includes('指定曲')) {
+        text2 += `・${MISSION_TEXT_LIST[index].replace(
+          '(指定曲)',
+          idolState.idol.music,
+        )}\n`;
+      } else {
+        text2 += `・${MISSION_TEXT_LIST[index]}\n`;
+      }
+    });
+    window.alert(text1 + text2);
+  };
+
   // ミッションの全体的な達成数を表示
   if (!(missionName in MISSION_TEXT_TO_INDEX)) {
     const missionCount = idolState.missionFlg.filter(flg => flg).length;
 
-    return <span>ミッション達成数＝{missionCount}</span>;
+    return (
+      <>
+        <span className="mr-3 mt-1">{missionCount}</span>
+        <Button size="sm" onClick={showMissionStatus}>
+          詳細
+        </Button>
+      </>
+    );
   }
 
   // 指定したミッションについての情報
