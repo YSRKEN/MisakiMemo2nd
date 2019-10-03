@@ -15,7 +15,8 @@ type ActionType =
   | 'setIdolType'
   | 'setMissionName'
   | 'changeMissionState'
-  | 'setSortType';
+  | 'setSortType'
+  | 'setHiddenCompletedIdolFlg';
 
 // アイドルの属性の種類
 type IdolType = 'All' | 'Princess' | 'Fairy' | 'Angel';
@@ -59,6 +60,8 @@ const MISSION_TEXT_TO_INDEX: { [key: string]: number } = {
   ドレスアップで着替え: 9,
 };
 
+const MISSION_COUNT = MISSION_TEXT_LIST.length;
+
 // Actionを表現するインターフェース
 interface Action {
   type: ActionType;
@@ -77,6 +80,7 @@ interface ApplicationStore {
   idolType: IdolType;
   missionName: string;
   sortType: SortType;
+  hiddenCompletedIdolFlg: boolean;
   filteredIdolStateList: IdolState[];
   dispatch: (action: Action) => void;
 }
@@ -150,8 +154,8 @@ const loadMissionFlg = () => {
   }
 
   const missionFlgs: boolean[][] = [];
-  for (let i = 0; i < 520; i += 10) {
-    missionFlgs.push(bitStore.slice(i, i + 10));
+  for (let i = 0; i < bitStore.length; i += MISSION_COUNT) {
+    missionFlgs.push(bitStore.slice(i, i + MISSION_COUNT));
   }
 
   return missionFlgs;
@@ -167,6 +171,8 @@ const useStore = () => {
   const [missionName, setMissionName] = useState(MISSION_TEXT_LIST2[0]);
   // ソート順
   const [sortType, setSortType] = useState<SortType>('IdolId');
+  // ミッションを全て終わらせたアイドルを非表示にするか？
+  const [hiddenCompletedIdolFlg, setHiddenCompletedIdolFlg] = useState(false);
   // アイドルのデータ一覧
   const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
@@ -231,6 +237,13 @@ const useStore = () => {
           record.idol.type === idolType,
       );
     }
+    if (hiddenCompletedIdolFlg) {
+      newIdolStateList = newIdolStateList.filter(record => {
+        const count = record.missionFlg.filter(flg => flg).length;
+
+        return count !== MISSION_COUNT;
+      });
+    }
 
     // 指定した順にソート
     switch (sortType) {
@@ -288,7 +301,14 @@ const useStore = () => {
         break;
     }
     setFilteredIdolStateList(newIdolStateList);
-  }, [idolName, idolType, sortType, idolStateList, missionName]);
+  }, [
+    idolName,
+    idolType,
+    sortType,
+    hiddenCompletedIdolFlg,
+    idolStateList,
+    missionName,
+  ]);
 
   // 設定を保存
   useEffect(() => {
@@ -332,6 +352,9 @@ const useStore = () => {
       case 'setSortType':
         setSortType(action.message as SortType);
         break;
+      case 'setHiddenCompletedIdolFlg':
+        setHiddenCompletedIdolFlg(action.message === 'True');
+        break;
       default:
         break;
     }
@@ -342,6 +365,7 @@ const useStore = () => {
     idolType,
     missionName,
     sortType,
+    hiddenCompletedIdolFlg,
     filteredIdolStateList,
     dispatch,
   };
@@ -349,9 +373,14 @@ const useStore = () => {
 
 // 検索フォームのComponent
 const SearchForm: React.FC = () => {
-  const { idolName, idolType, missionName, sortType, dispatch } = useContext(
-    StateContext,
-  );
+  const {
+    idolName,
+    idolType,
+    missionName,
+    sortType,
+    hiddenCompletedIdolFlg,
+    dispatch,
+  } = useContext(StateContext);
 
   const onChangeIdolName = (e: FormEvent<any>) =>
     dispatch({
@@ -377,8 +406,15 @@ const SearchForm: React.FC = () => {
       message: e.currentTarget.value,
     } as Action);
 
+  const onChangeHiddenCompletedIdolFlg = () => {
+    dispatch({
+      type: 'setHiddenCompletedIdolFlg',
+      message: hiddenCompletedIdolFlg ? 'False' : 'True',
+    } as Action);
+  };
+
   return (
-    <Form className="border p-3">
+    <Form className="border px-3 pt-3">
       <Form.Group controlId="idolName">
         <Form.Label>アイドルの名前</Form.Label>
         <Form.Control
@@ -417,6 +453,23 @@ const SearchForm: React.FC = () => {
             </option>
           ))}
         </Form.Control>
+      </Form.Group>
+      <Form.Group controlId="Option">
+        <Form.Check
+          className="d-inline mr-3"
+          type="checkbox"
+          label="完遂者を非表示"
+          checked={hiddenCompletedIdolFlg}
+          onChange={onChangeHiddenCompletedIdolFlg}
+        />
+      </Form.Group>
+      <Form.Group controlId="Misc" className="text-center">
+        <Button size="sm" className="mr-3">
+          進捗をコピー
+        </Button>
+        <Button size="sm" variant="warning">
+          進捗を貼り付け
+        </Button>
       </Form.Group>
     </Form>
   );
