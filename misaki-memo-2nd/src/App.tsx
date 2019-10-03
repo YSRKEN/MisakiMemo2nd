@@ -7,10 +7,14 @@ import React, {
 } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Form, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, ListGroup, Button } from 'react-bootstrap';
 
 // Actionの種類
-type ActionType = 'setIdolName' | 'setIdolType' | 'setMissionName';
+type ActionType =
+  | 'setIdolName'
+  | 'setIdolType'
+  | 'setMissionName'
+  | 'changeMissionState';
 
 // アイドルの属性の種類
 type IdolType = 'All' | 'Princess' | 'Fairy' | 'Angel';
@@ -27,22 +31,22 @@ const MISSION_TEXT_LIST = [
   'ギフトプレゼントする',
   '(指定曲)をクリアする',
   'メールかブログを見る',
-  'ドレスアップで着替え'
+  'ドレスアップで着替え',
 ];
 
 const MISSION_TEXT_LIST2 = ['(未指定)', ...MISSION_TEXT_LIST];
 
-const MISSION_TEXT_TO_INDEX: {[key: string]: number} = {
-  'アイドルを覚醒させる': 0,
-  'ユニットライブの成功': 1,
-  'ソロライブ成功させる': 2,
-  '親愛度を50以上増やす': 3,
-  'メモリアルコミュ閲覧': 4,
+const MISSION_TEXT_TO_INDEX: { [key: string]: number } = {
+  アイドルを覚醒させる: 0,
+  ユニットライブの成功: 1,
+  ソロライブ成功させる: 2,
+  親愛度を50以上増やす: 3,
+  メモリアルコミュ閲覧: 4,
   '13人ライブ MVを見る': 5,
-  'ギフトプレゼントする': 6,
+  ギフトプレゼントする: 6,
   '(指定曲)をクリアする': 7,
-  'メールかブログを見る': 8,
-  'ドレスアップで着替え': 9
+  メールかブログを見る: 8,
+  ドレスアップで着替え: 9,
 };
 
 // Actionを表現するインターフェース
@@ -90,19 +94,33 @@ const useStore = () => {
   // アイドルのデータ一覧
   const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
-  const [filteredIdolStateList, setFilteredIdolStateList] = useState<IdolState[]>([]);
+  const [filteredIdolStateList, setFilteredIdolStateList] = useState<
+    IdolState[]
+  >([]);
 
   // 状態の初期化
   useEffect(() => {
     fetch('./idol_list.json').then((res: Response) => {
       res.json().then((dataList: IdolData[]) => {
-        setIdolStateList(dataList.map((data: IdolData) => {
-          return {
-            'idol': data, 'missionFlg': [
-              false, false, false, false, false, false, false, false, false, false
-            ]
-          } as IdolState;
-        }));
+        setIdolStateList(
+          dataList.map((data: IdolData) => {
+            return {
+              idol: data,
+              missionFlg: [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+              ],
+            } as IdolState;
+          }),
+        );
       });
     });
   }, []);
@@ -138,6 +156,21 @@ const useStore = () => {
       case 'setMissionName':
         setMissionName(action.message);
         break;
+      case 'changeMissionState': {
+        const [selectedIdolName, selectedMissionName] = action.message.split(
+          ',',
+        );
+        const idolIndex = idolStateList.findIndex(
+          state => state.idol.name === selectedIdolName,
+        );
+        const missionIndex = MISSION_TEXT_TO_INDEX[selectedMissionName];
+        const newIdolStateList = [...idolStateList];
+        newIdolStateList[idolIndex].missionFlg[
+          missionIndex
+        ] = !newIdolStateList[idolIndex].missionFlg[missionIndex];
+        setIdolStateList(newIdolStateList);
+        break;
+      }
       default:
         break;
     }
@@ -148,7 +181,9 @@ const useStore = () => {
 
 // 検索フォームのComponent
 const SearchForm: React.FC = () => {
-  const { idolName, idolType, missionName, dispatch } = useContext(StateContext);
+  const { idolName, idolType, missionName, dispatch } = useContext(
+    StateContext,
+  );
 
   const onChangeIdolName = (e: FormEvent<any>) =>
     dispatch({
@@ -166,7 +201,7 @@ const SearchForm: React.FC = () => {
     dispatch({
       type: 'setMissionName',
       message: e.currentTarget.value,
-  } as Action);
+    } as Action);
 
   return (
     <Form className="border p-3">
@@ -189,7 +224,11 @@ const SearchForm: React.FC = () => {
       </Form.Group>
       <Form.Group controlId="idolType">
         <Form.Label>ミッションの種類</Form.Label>
-        <Form.Control as="select" value={missionName} onChange={onChangeMissionName}>
+        <Form.Control
+          as="select"
+          value={missionName}
+          onChange={onChangeMissionName}
+        >
           {MISSION_TEXT_LIST2.map((name: string) => (
             <option key={name}>{name}</option>
           ))}
@@ -199,38 +238,90 @@ const SearchForm: React.FC = () => {
   );
 };
 
+const IdolMissionStatus: React.FC<{ idolState: IdolState }> = ({
+  idolState,
+}) => {
+  const { missionName, dispatch } = useContext(StateContext);
+
+  const changeMissionState = () =>
+    dispatch({
+      type: 'changeMissionState',
+      message: `${idolState.idol.name},${missionName}`,
+    } as Action);
+
+  // ミッションの全体的な達成数を表示
+  if (!(missionName in MISSION_TEXT_TO_INDEX)) {
+    const missionCount = idolState.missionFlg.filter(flg => flg).length;
+
+    return <span>ミッション達成数＝{missionCount}</span>;
+  }
+
+  // 指定したミッションについての情報
+  if (idolState.missionFlg[MISSION_TEXT_TO_INDEX[missionName]]) {
+    // 達成時はその旨と、達成を取り消すボタンを表示する
+    return (
+      <>
+        <span className="mr-3 mt-1">達成</span>
+        <Button variant="warning" size="sm" onClick={changeMissionState}>
+          未達成にする
+        </Button>
+      </>
+    );
+  }
+  // 未達成時は達成条件と、達成したことを知らせるボタンを表示する
+  if (missionName.includes('指定曲')) {
+    return (
+      <>
+        <span className="mr-3 mt-1">{`未達成(${idolState.idol.music})`}</span>
+        <Button variant="secondary" size="sm" onClick={changeMissionState}>
+          達成にする
+        </Button>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className="mr-3 mt-1">未達成</span>
+      <Button variant="secondary" size="sm" onClick={changeMissionState}>
+        達成にする
+      </Button>
+    </>
+  );
+};
+
+// アイドル単体のComponent
+const IdolRow: React.FC<{ idolState: IdolState }> = ({ idolState }) => {
+  return (
+    <ListGroup.Item key={idolState.idol.id}>
+      <div className="d-flex">
+        <div
+          className="border border-dark mr-1 mt-1"
+          style={{
+            backgroundColor: idolState.idol.color,
+            width: 20,
+            height: 20,
+          }}
+        />
+        <span className="font-weight-bold mr-3 mt-1">
+          {idolState.idol.name}
+        </span>
+        <IdolMissionStatus idolState={idolState} />
+      </div>
+    </ListGroup.Item>
+  );
+};
+
 // アイドル一覧のComponent
 const IdolView: React.FC = () => {
-  const { missionName, filteredIdolStateList } = useContext(StateContext);
+  const { filteredIdolStateList } = useContext(StateContext);
 
   if (filteredIdolStateList.length > 0) {
     return (
       <ListGroup>
-        {filteredIdolStateList.map((idolState: IdolState) => {
-          const missionCount = idolState.missionFlg.filter(flg => flg).length;
-          return (
-            <ListGroup.Item key={idolState.idol.id}>
-              <div className="d-flex">
-                <div
-                  className="border border-dark mr-1 mt-1"
-                  style={{
-                    backgroundColor: idolState.idol.color,
-                    width: 20,
-                    height: 20,
-                  }}
-                />
-                <span className="font-weight-bold">{idolState.idol.name}</span>
-                {
-                  missionName in MISSION_TEXT_TO_INDEX
-                  ? (<span>　{idolState.missionFlg[MISSION_TEXT_TO_INDEX[missionName]]
-                      ? '達成'
-                      : missionName.includes('指定曲') ? `未達成(${idolState.idol.music})` : '未達成'}</span>)
-                  : (<span>　ミッション達成数＝{missionCount}</span>)
-                }
-              </div>
-            </ListGroup.Item>
-          );
-        })}
+        {filteredIdolStateList.map((idolState: IdolState) => (
+          <IdolRow key={idolState.idol.id} idolState={idolState} />
+        ))}
       </ListGroup>
     );
   }
