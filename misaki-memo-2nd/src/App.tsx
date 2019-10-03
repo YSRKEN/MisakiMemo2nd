@@ -94,6 +94,69 @@ interface IdolData {
   color: string;
 }
 
+// 進捗状況を保存する
+const saveMissionFlg = (idolStateList: IdolState[]) => {
+  // 10項目×52=520フラグ分を一旦配列にストアする
+  const bitStore: number[] = [];
+  for (const idolState of idolStateList) {
+    idolState.missionFlg.forEach(flg => bitStore.push(flg ? 1 : 0));
+  }
+
+  // ストアしたものを8bitづつ区切って表現する。520÷8＝65なので割り切れる
+  const OCTET = 8;
+  const byteStore: number[] = [];
+  for (let i = 0; i < bitStore.length; i += OCTET) {
+    byteStore.push(
+      (bitStore[i] << 7) |
+        (bitStore[i + 1] << 6) |
+        (bitStore[i + 2] << 5) |
+        (bitStore[i + 3] << 4) |
+        (bitStore[i + 4] << 3) |
+        (bitStore[i + 5] << 2) |
+        (bitStore[i + 6] << 1) |
+        bitStore[i + 7],
+    );
+  }
+
+  // 区切ったものをBase64変換する
+  const binStr = String.fromCharCode(...byteStore);
+  const base64Word = btoa(binStr);
+
+  // ローカルストレージに保存する
+  window.localStorage.setItem('saveData', base64Word);
+};
+
+// 進捗状況を読み込む
+const loadMissionFlg = () => {
+  // ローカルストレージからデータを読み込む
+  const base64Word = window.localStorage.getItem('saveData');
+  if (base64Word === null) {
+    return [];
+  }
+
+  // デコードする
+  const binStr = atob(base64Word);
+  const byteStore = binStr.split('').map(c => c.charCodeAt(0));
+  const bitStore: boolean[] = [];
+  for (const byteData of byteStore) {
+    bitStore.push(((byteData >> 7) & 1) === 1);
+    bitStore.push(((byteData >> 6) & 1) === 1);
+    bitStore.push(((byteData >> 5) & 1) === 1);
+    bitStore.push(((byteData >> 4) & 1) === 1);
+    bitStore.push(((byteData >> 3) & 1) === 1);
+    bitStore.push(((byteData >> 2) & 1) === 1);
+    bitStore.push(((byteData >> 1) & 1) === 1);
+    bitStore.push(((byteData >> 0) & 1) === 1);
+  }
+
+  const missionFlgs: boolean[][] = [];
+  for (let i = 0; i < 520; i += 10) {
+    missionFlgs.push(bitStore.slice(i, i + 10));
+  }
+
+  return missionFlgs;
+};
+
 // ApplicationStore型の値を返す関数
 const useStore = () => {
   // アイドルの名前
@@ -110,30 +173,44 @@ const useStore = () => {
   const [filteredIdolStateList, setFilteredIdolStateList] = useState<
     IdolState[]
   >([]);
+  const [initializeFlg, setInitializeFlg] = useState(false);
 
   // 状態の初期化
   useEffect(() => {
     fetch('./idol_list.json').then((res: Response) => {
       res.json().then((dataList: IdolData[]) => {
-        setIdolStateList(
-          dataList.map((data: IdolData) => {
-            return {
-              idol: data,
-              missionFlg: [
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-              ],
-            } as IdolState;
-          }),
-        );
+        const missionFlgs = loadMissionFlg();
+        if (missionFlgs.length === 0) {
+          setIdolStateList(
+            dataList.map((data: IdolData) => {
+              return {
+                idol: data,
+                missionFlg: [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                ],
+              } as IdolState;
+            }),
+          );
+        } else {
+          setIdolStateList(
+            dataList.map((data: IdolData, index: number) => {
+              return {
+                idol: data,
+                missionFlg: missionFlgs[index],
+              } as IdolState;
+            }),
+          );
+        }
+        setInitializeFlg(true);
       });
     });
   }, []);
@@ -141,6 +218,8 @@ const useStore = () => {
   // 表示するアイドルの一覧を更新
   useEffect(() => {
     let newIdolStateList: IdolState[] = [];
+
+    // 表示するアイドルを制限
     if (idolType === 'All') {
       newIdolStateList = idolStateList.filter(record =>
         `${record.idol.name}/${record.idol.ruby}`.includes(idolName),
@@ -152,14 +231,19 @@ const useStore = () => {
           record.idol.type === idolType,
       );
     }
+
+    // 指定した順にソート
     switch (sortType) {
       case 'IdolId':
+        // アイドルID順
         newIdolStateList = newIdolStateList.sort(
           (a, b) => a.idol.id - b.idol.id,
         );
         break;
       case 'MissionAsc': {
+        // ミッションの未達成順
         if (missionName === MISSION_TEXT_LIST2[0]) {
+          // 達成数を数えてソート
           newIdolStateList = newIdolStateList.sort((a, b) => {
             const aCount = a.missionFlg.filter(flg => flg).length;
             const bCount = b.missionFlg.filter(flg => flg).length;
@@ -167,6 +251,7 @@ const useStore = () => {
             return aCount - bCount;
           });
         } else {
+          // 達成していないものを上に
           const missionIndex = MISSION_TEXT_TO_INDEX[missionName];
           newIdolStateList = newIdolStateList.sort((a, b) => {
             const aCount = a.missionFlg[missionIndex] ? 1 : 0;
@@ -178,7 +263,9 @@ const useStore = () => {
         break;
       }
       case 'MissionDesc': {
+        // ミッションの達成順
         if (missionName === MISSION_TEXT_LIST2[0]) {
+          // 達成数を数えてソート
           newIdolStateList = newIdolStateList.sort((a, b) => {
             const aCount = a.missionFlg.filter(flg => flg).length;
             const bCount = b.missionFlg.filter(flg => flg).length;
@@ -186,6 +273,7 @@ const useStore = () => {
             return bCount - aCount;
           });
         } else {
+          // 達成しているものを上に
           const missionIndex = MISSION_TEXT_TO_INDEX[missionName];
           newIdolStateList = newIdolStateList.sort((a, b) => {
             const aCount = a.missionFlg[missionIndex] ? 1 : 0;
@@ -202,6 +290,13 @@ const useStore = () => {
     setFilteredIdolStateList(newIdolStateList);
   }, [idolName, idolType, sortType, idolStateList, missionName]);
 
+  // 設定を保存
+  useEffect(() => {
+    if (initializeFlg) {
+      saveMissionFlg(idolStateList);
+    }
+  }, [idolStateList, initializeFlg]);
+
   // Reduxのdispatchに相当する
   const dispatch = (action: Action) => {
     switch (action.type) {
@@ -215,13 +310,18 @@ const useStore = () => {
         setMissionName(action.message);
         break;
       case 'changeMissionState': {
+        // 誰のどのミッションについての変更かを読み取る
         const [selectedIdolName, selectedMissionName] = action.message.split(
           ',',
         );
+
+        // アイドル・ミッションそれぞれのインデックスを算出
         const idolIndex = idolStateList.findIndex(
           state => state.idol.name === selectedIdolName,
         );
         const missionIndex = MISSION_TEXT_TO_INDEX[selectedMissionName];
+
+        // 書き換えたものを再度上書きする
         const newIdolStateList = [...idolStateList];
         newIdolStateList[idolIndex].missionFlg[
           missionIndex

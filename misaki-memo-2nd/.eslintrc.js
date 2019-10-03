@@ -68,6 +68,7 @@ module.exports = {
         markers: ['/'],
       },
     ],
+    'no-bitwise': 'off',
 
     // @typescript-eslint
     '@typescript-eslint/explicit-function-return-type': 'off',
