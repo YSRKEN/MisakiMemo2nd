@@ -16,7 +16,10 @@ type ActionType =
   | 'setMissionName'
   | 'changeMissionState'
   | 'setSortType'
-  | 'setHiddenCompletedIdolFlg';
+  | 'setHiddenCompletedIdolFlg'
+  | 'setDumpData'
+  | 'loadDumpData'
+  | 'saveDumpData';
 
 // アイドルの属性の種類
 type IdolType = 'All' | 'Princess' | 'Fairy' | 'Angel';
@@ -81,6 +84,7 @@ interface ApplicationStore {
   missionName: string;
   sortType: SortType;
   hiddenCompletedIdolFlg: boolean;
+  dumpSaveData: string;
   filteredIdolStateList: IdolState[];
   dispatch: (action: Action) => void;
 }
@@ -173,6 +177,8 @@ const useStore = () => {
   const [sortType, setSortType] = useState<SortType>('IdolId');
   // ミッションを全て終わらせたアイドルを非表示にするか？
   const [hiddenCompletedIdolFlg, setHiddenCompletedIdolFlg] = useState(false);
+  // ダンプした進捗状況
+  const [dumpSaveData, setDumpSaveData] = useState('');
   // アイドルのデータ一覧
   const [idolStateList, setIdolStateList] = useState<IdolState[]>([]);
   // 表示するアイドルの一覧
@@ -355,6 +361,32 @@ const useStore = () => {
       case 'setHiddenCompletedIdolFlg':
         setHiddenCompletedIdolFlg(action.message === 'True');
         break;
+      case 'setDumpData':
+        setDumpSaveData(action.message);
+        break;
+      case 'loadDumpData': {
+        window.localStorage.setItem('saveData', dumpSaveData);
+        const missionFlgs = loadMissionFlg();
+        if (missionFlgs.length !== 0) {
+          setIdolStateList(
+            idolStateList.map((data: IdolState, index: number) => {
+              return {
+                idol: data.idol,
+                missionFlg: missionFlgs[index],
+              } as IdolState;
+            }),
+          );
+        }
+        setDumpSaveData('');
+        break;
+      }
+      case 'saveDumpData': {
+        const saveData = window.localStorage.getItem('saveData');
+        if (saveData !== null) {
+          setDumpSaveData(saveData);
+        }
+        break;
+      }
       default:
         break;
     }
@@ -366,6 +398,7 @@ const useStore = () => {
     missionName,
     sortType,
     hiddenCompletedIdolFlg,
+    dumpSaveData,
     filteredIdolStateList,
     dispatch,
   };
@@ -379,6 +412,7 @@ const SearchForm: React.FC = () => {
     missionName,
     sortType,
     hiddenCompletedIdolFlg,
+    dumpSaveData,
     dispatch,
   } = useContext(StateContext);
 
@@ -411,6 +445,30 @@ const SearchForm: React.FC = () => {
       type: 'setHiddenCompletedIdolFlg',
       message: hiddenCompletedIdolFlg ? 'False' : 'True',
     } as Action);
+  };
+
+  const onChangeDumpData = (e: FormEvent<any>) =>
+    dispatch({
+      type: 'setDumpData',
+      message: e.currentTarget.value,
+    } as Action);
+
+  const onClickSaveDumpData = () =>
+    dispatch({
+      type: 'saveDumpData',
+      message: '',
+    } as Action);
+
+  const onClickLoadDumpData = () => {
+    if (dumpSaveData === '') {
+      return;
+    }
+    if (window.confirm('進捗状況を読み込んでよろしいですか？')) {
+      dispatch({
+        type: 'loadDumpData',
+        message: '',
+      } as Action);
+    }
   };
 
   return (
@@ -464,11 +522,17 @@ const SearchForm: React.FC = () => {
         />
       </Form.Group>
       <Form.Group controlId="Misc" className="text-center">
-        <Button size="sm" className="mr-3">
-          進捗をコピー
+        <Form.Control
+          className="d-inline mr-3 w-auto mb-2"
+          placeholder="進捗(Base64)"
+          value={dumpSaveData}
+          onChange={onChangeDumpData}
+        />
+        <Button size="sm" className="mr-3" onClick={onClickSaveDumpData}>
+          進捗を出力
         </Button>
-        <Button size="sm" variant="warning">
-          進捗を貼り付け
+        <Button size="sm" variant="warning" onClick={onClickLoadDumpData}>
+          進捗を入力
         </Button>
       </Form.Group>
     </Form>
